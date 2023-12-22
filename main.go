@@ -4,47 +4,43 @@ import(
 	"fmt"
 )
 
-type node struct {
+type Node struct {
 	key int32
 	val int32
-	left *node
-	right *node
+	left *Node
+	right *Node
 }
 
-//capacity of the cache
-var capacity uint32
-// declaring head & tail for LL
-var head *node = &node{
-	key: 0,
-	val: 0,
-	left: nil,
-	right: nil,
+type Hash map[int32]*Node
+
+type Cache struct{
+	head *Node
+	tail *Node
+	hash Hash
+	capacity int32
 }
 
-var tail *node = &node{
-	key: 0,
-	val: 0,
-	left: nil,
-	right:nil,
+func buildCache(size int32) Cache{
+	newCache := Cache{
+		head: &Node{0,0,nil,nil},
+		tail: &Node{0,0,nil,nil},
+		hash: Hash{},
+		capacity: size,
+	}
+	(*(newCache.head)).right = newCache.tail
+	(*(newCache.tail)).left = newCache.head
+	return newCache
 }
 
-//define map key -> ptr to node
-var myMap = map[int32](*node){}
-
-// define the count
-var cacheSize uint32 = 0
 
 func main(){
 	fmt.Println("LRU-cache")
 	fmt.Println("---------------------------------")
 	fmt.Print("Enter the capacity of the LRU cache : ")
+	var capacity int32
 	fmt.Scan(&capacity)	
 
-	
-
-	// init the LL
-	(*head).right = tail
-	(*tail).left = head
+	cache := buildCache(capacity)
 
 	// while loop
 	for v:=0;v<1;{
@@ -55,18 +51,18 @@ func main(){
 		2. Get a value
 		3. Print current state of cache
 		4. Clear cache
-		any number to exit 
+		5. Quit - 0
 		choice : `)
 		fmt.Scan(&choice)
 		switch choice {
 		case 1:
-			Set()
+			cache.Set()
 		case 2:
-			Get()
+			cache.Get()
 		case 3:
-			PrintState()
+			cache.PrintState()
 		case 4:
-			ClearCache()
+			cache.ClearCache()
 		default:
 			break
 		}

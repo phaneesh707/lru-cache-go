@@ -5,22 +5,22 @@ import(
 )
 
 
-func Get(){
+func (cache *Cache) Get(){
 	var k int32
 	fmt.Print("Key : ")
 	fmt.Scan(&k)
 
-	val , ok := myMap[k]
+	val , ok := cache.hash[k]
 	if ok{
-		DeleteAndAddToFront(k)
+		cache.DeleteAndAddToFront(k)
 		fmt.Printf("Key : %v    Value : %v\n",k,(*val).val)
 	}else{
 		fmt.Printf("Key %v does not exist!\n",k)
 	}
-
 }
 
-func Set(){
+
+func (cache *Cache) Set(){
 	//input Key and val
 	var k,v int32
 	fmt.Print("key : ")
@@ -29,56 +29,41 @@ func Set(){
 	fmt.Scan(&v)
 
 	// update if key present
-	_,ok := myMap[k]
+	_,ok := cache.hash[k]
 	if ok {
-		(*(myMap[k])).val = v
-		DeleteAndAddToFront(k)
+		(*(cache.hash[k])).val = v
+		cache.DeleteAndAddToFront(k)
 		return
 	}
 
 	// if cache is full remove the least recently used item
-	if cacheSize == capacity {
+	if cache.capacity == int32(len(cache.hash)) {
 		//delete the last node 
-		keyToDel := (*((*tail).left)).key
+		keyToDel := (*((*cache.tail).left)).key
 
-		ptr := myMap[keyToDel]
-		leftNode := (*ptr).left
-		rightNode := (*ptr).right
-		
-		(*leftNode).right = rightNode
-		(*rightNode).left = leftNode
+		cache.DeleteNode(keyToDel)
 
-		delete(myMap,keyToDel)
-		
+		delete(cache.hash,keyToDel)
 	}
 	
-	var newNode  = node{
-		key: k,
-		val: v,
-		left: nil,
-		right: nil,
-	}
-	var nodePtr = &newNode
-
-	(*nodePtr).left = head
-	(*nodePtr).right = (*head).right
-	(*head).right = nodePtr
-	(*((*nodePtr).right)).left = nodePtr
-	myMap[k] = nodePtr
+	//Add the item to cache
+	cache.AddNewNode(k,v)
 
 	// increase size if size less than cap
-	if cacheSize<capacity {
-		cacheSize+=1
+	if int32(len(cache.hash)) < cache.capacity {
+		cache.capacity+=1
 	}
+
+	cache.PrintState()
 	
 }
 
 
 // prints the current state of cache
-func PrintState(){
-	var nodePtr = (*head).right
+func (cache *Cache) PrintState(){
+	var nodePtr = (*(cache.head)).right
 	fmt.Print("Head<--->")
-	for nodePtr != tail {
+	for nodePtr != cache.tail {
 		fmt.Printf("(%v,%v)<--->",(*nodePtr).key,(*nodePtr).val)
 		nodePtr = (*nodePtr).right
 	}
@@ -87,9 +72,9 @@ func PrintState(){
 
 
 // clear the cache
-func ClearCache(){
-	myMap = make(map[int32](*node))
-	(*head).right = tail
-	(*tail).left = head
-	cacheSize = 0
+func (cache *Cache) ClearCache(){
+	cache.hash = make(map[int32](*Node))
+	(*cache.head).right = cache.tail
+	(*cache.tail).left = cache.head
+	cache.capacity = 0
 }
